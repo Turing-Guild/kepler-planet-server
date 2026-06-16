@@ -1,0 +1,170 @@
+---
+title: "Trusted Module Catalog"
+description: "How habitat module behavior should be owned by the server while students design and operate the habitat."
+---
+
+The long-term game mechanic should not depend on students writing honest module physics.
+
+Instead, the Planet Simulation Server should own a trusted catalog of habitat module types. Students choose from that catalog, assemble a habitat design, connect modules together, decide where to spend limited resources, and then build the software that monitors and operates the habitat.
+
+## Decision
+
+Use a server-owned module catalog.
+
+Students do not implement the core behavior of a solar array, greenhouse, scrubber, water recycler, or radiation shelter. The server owns those rules so a module cannot become indestructible just because a student coded it that way.
+
+Students own:
+
+- Which modules to include
+- How many copies to include
+- How modules are connected
+- Which upgrades to buy
+- What to automate
+- How to respond to alerts
+- Which mission objectives to pursue
+
+The game becomes:
+
+> Design and operate a useful habitat under hostile constraints.
+
+Not just:
+
+> Keep a fake base alive forever.
+
+## Module definition
+
+A trusted module type should describe what the module costs, what it consumes, what it produces, how much it can handle, and what planet events can hurt it.
+
+Example shape:
+
+```json
+{
+  "moduleType": "solar_array",
+  "displayName": "Solar Array",
+  "cost": {
+    "qubits": 20,
+    "massKg": 180
+  },
+  "inputs": [],
+  "outputs": [
+    {
+      "resource": "power",
+      "rate": 12,
+      "unit": "kW"
+    }
+  ],
+  "capacity": {
+    "maxOutputKw": 12
+  },
+  "vulnerabilities": [
+    "dust_accumulation",
+    "hail_damage",
+    "low_light"
+  ],
+  "maintenance": {
+    "requiresInspectionEveryTicks": 240,
+    "repairCostQubits": 4
+  },
+  "upgrades": [
+    "dust_shedding_coating",
+    "storm_bracing"
+  ],
+  "eventSensitivities": {
+    "planet.dust_update": {
+      "outputMultiplierField": "solarOutput"
+    }
+  }
+}
+```
+
+Other catalog modules could include:
+
+- Battery bank
+- Greenhouse
+- CO2 scrubber
+- Water recycler
+- Radiation shelter
+- Rover bay
+- Sensor array
+- EVA airlock
+- Automation node
+- Research lab
+
+## Habitat design
+
+Students submit a habitat design made from trusted module types. The server validates the design, creates module instances, and simulates the consequences.
+
+Example shape:
+
+```json
+{
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-17",
+  "modules": [
+    {
+      "id": "solar-a",
+      "moduleType": "solar_array",
+      "upgrades": ["dust_shedding_coating"]
+    },
+    {
+      "id": "battery-a",
+      "moduleType": "battery_bank",
+      "upgrades": []
+    },
+    {
+      "id": "greenhouse-a",
+      "moduleType": "greenhouse",
+      "upgrades": ["thermal_buffering"]
+    }
+  ],
+  "connections": [
+    {
+      "from": "solar-a",
+      "to": "battery-a",
+      "resource": "power"
+    },
+    {
+      "from": "battery-a",
+      "to": "greenhouse-a",
+      "resource": "power"
+    }
+  ]
+}
+```
+
+## Student software
+
+Student-built systems still matter. They just operate around trusted module behavior instead of replacing it.
+
+Examples:
+
+- A dashboard that visualizes power, oxygen, water, crop health, and radiation.
+- A CLI that acknowledges alerts and requests repairs.
+- An agent that watches overnight, makes allowed operational decisions, and produces a morning report.
+- A greenhouse controller that changes lighting schedules when power drops.
+- A rover operations tool that chooses when to pause an expedition during a storm.
+
+Those systems communicate over the habitat channel, but the server remains the authority on whether the habitat actually has enough power, water, oxygen, repair capacity, or crew safety margin.
+
+## Mission objectives
+
+The goal should be more interesting than simple survival. A habitat can survive and still fail its mission.
+
+Possible objectives:
+
+- Produce a target amount of research data.
+- Grow food for a fixed number of sols.
+- Extract and recycle enough water to expand crew capacity.
+- Maintain crew health during a radiation season.
+- Complete rover expeditions during narrow weather windows.
+- Build a self-sustaining greenhouse loop.
+- Support an EVA construction mission.
+- Keep operations stable overnight using an autonomous agent.
+
+Different objectives create different design tradeoffs. A research-heavy habitat may need sensors and lab uptime. A greenhouse objective may need stable power, water recycling, and thermal control. A rover objective may need charging capacity, dust forecasting, and spare parts.
+
+## Implementation status
+
+This is the chosen design direction, not the current Hello World implementation.
+
+Today, the server only emits planet events and relays habitat-scoped module messages. Future slices should add catalog storage, habitat design submission, server-side simulation of trusted module behavior, mission objectives, and scoring.

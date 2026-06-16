@@ -13,17 +13,23 @@ The Planet Simulation Server owns:
 - Shared-token auth
 - Habitat channel membership
 - Server-owned planet ticks
+- Trusted module catalog and module behavior, in a future slice
+- Server-owned simulation outcomes
 - Recent event replay
 - Module message relay within a habitat channel
 - Health reporting
 
 Student habitat systems own:
 
-- Local habitat state
-- Rules and alerts
-- Module behavior
+- Habitat design choices
+- Module interconnections
+- Redundancy and upgrade strategy
+- Monitoring, rules, and alerts
 - Dashboards and CLIs
 - Agents and reports
+- Response strategy during planet events
+
+Students should not have to prove they modeled a scrubber, greenhouse, or solar array honestly. The server should eventually own those trusted behaviors. Students should instead decide what to build, how to connect it, how to monitor it, and how to operate it under pressure.
 
 ## Runtime flow
 
@@ -37,6 +43,12 @@ Habitat module
   -> module.message or module.status
   -> server stores event
   -> server relays to same habitat channel
+
+Future habitat design
+  -> student chooses trusted module types
+  -> student connects modules into a habitat graph
+  -> server simulates module consequences
+  -> student systems monitor, automate, and respond
 ```
 
 ## Current deployment
@@ -70,4 +82,4 @@ wss://planet.turingguild.com/planet/stream
 
 The Hello World version stores recent events in memory only. Restarting the service clears replay history, active channels, and connected clients.
 
-This is acceptable for the first slice. A later production version should move event history, habitat registry, and audit data into durable storage.
+This is acceptable for the first slice. A later production version should move event history, habitat registry, habitat designs, the trusted module catalog, mission objectives, and audit data into durable storage.

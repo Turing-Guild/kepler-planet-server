@@ -63,11 +63,13 @@ They also allow a student's habitat modules to run on different computers while 
 kepler-442b/habitat-17
   dashboard
   CLI operator console
-  power module
-  life-support module
-  greenhouse module
+  power controller
+  life-support monitor
+  greenhouse operator
   night-watch agent
 ```
+
+In the long-term design, these connected processes are operators, adapters, dashboards, or agents around trusted server-defined module types. They can report status and request actions, but the server should own the core module consequences so a student cannot make an indestructible greenhouse just by coding one.
 
 ## Isolation rule
 

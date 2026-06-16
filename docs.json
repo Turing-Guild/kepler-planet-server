@@ -33,6 +33,7 @@
             "group": "Architecture",
             "pages": [
               "docs/architecture/overview",
+              "docs/architecture/module-catalog",
               "docs/architecture/channel-model"
             ]
           },

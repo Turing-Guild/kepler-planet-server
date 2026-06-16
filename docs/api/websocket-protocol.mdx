@@ -89,6 +89,8 @@ After `hello`, a client can send:
 
 The server stores the message as an event and relays it to other clients in the same habitat channel.
 
+In the Hello World server, module messages are communication events only. They are not trusted module definitions and do not change authoritative habitat physics yet. A future module-catalog slice should make the server responsible for trusted module behavior and habitat consequences.
+
 Supported Hello World module event types:
 
 - `module.message`
