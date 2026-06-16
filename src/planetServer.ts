@@ -89,13 +89,16 @@ async function handleHttpRequest(
 ): Promise<void> {
   const url = new URL(req.url || '/', `http://${req.headers.host || `localhost:${config.port}`}`);
 
-  if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/docs' || url.pathname.startsWith('/docs/'))) {
+  if (
+    (req.method === 'GET' || req.method === 'HEAD')
+    && (url.pathname === '/' || url.pathname === '/docs' || url.pathname.startsWith('/docs/'))
+  ) {
     const page = await renderDocsPage(url.pathname);
     res.writeHead(page.status, {
       'Content-Type': page.contentType,
       'Cache-Control': 'no-store',
     });
-    res.end(page.body);
+    res.end(req.method === 'HEAD' ? undefined : page.body);
     return;
   }
 

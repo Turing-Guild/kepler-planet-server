@@ -106,6 +106,10 @@ describe('planet server integration', () => {
     const body = await response.text();
     assert.match(body, /Trusted Module Catalog/);
     assert.match(body, /Kepler Planet Server/);
+
+    const headResponse = await fetch('http://127.0.0.1:9880/docs', { method: 'HEAD' });
+    assert.equal(headResponse.status, 200);
+    assert.match(headResponse.headers.get('content-type'), /text\/html/);
   });
 });
 
