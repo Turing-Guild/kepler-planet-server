@@ -89,6 +89,24 @@ describe('planet server integration', () => {
     const response = await fetch('http://127.0.0.1:9879/events?habitatId=habitat-alpha&since=0');
     assert.equal(response.status, 401);
   });
+
+  it('renders documentation pages over HTTP', async () => {
+    activeServer = startPlanetServer({
+      port: 9880,
+      sharedToken: token,
+      tickMs: 100000,
+      replayLimit: 50,
+    });
+    await waitForHealth(9880);
+
+    const response = await fetch('http://127.0.0.1:9880/docs/architecture/module-catalog');
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('content-type'), /text\/html/);
+
+    const body = await response.text();
+    assert.match(body, /Trusted Module Catalog/);
+    assert.match(body, /Kepler Planet Server/);
+  });
 });
 
 async function connectClient(port, habitatId, moduleId) {

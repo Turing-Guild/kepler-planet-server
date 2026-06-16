@@ -2,6 +2,7 @@ import http from 'node:http';
 import { WebSocket, WebSocketServer } from 'ws';
 import { isAuthorized, rejectUpgrade, sendJson, sendUnauthorized } from './auth.js';
 import type { Config } from './config.js';
+import { renderDocsPage } from './docsSite.js';
 import type { ClientContext, EventEnvelope, HelloMessage, ModuleEnvelope, PlanetState } from './types.js';
 import { isHelloMessage, isModuleEnvelope, parseJsonMessage } from './validation.js';
 
@@ -36,7 +37,10 @@ export function createServerState(): ServerState {
 export function startPlanetServer(config: Config): PlanetServerHandle {
   const state = createServerState();
   const server = http.createServer((req, res) => {
-    handleHttpRequest(req, res, config, state);
+    handleHttpRequest(req, res, config, state).catch((error: unknown) => {
+      console.error('HTTP request failed.', error);
+      sendJson(res, 500, { error: 'Internal server error' });
+    });
   });
 
   const wss = new WebSocketServer({ noServer: true });
@@ -77,13 +81,23 @@ export function startPlanetServer(config: Config): PlanetServerHandle {
   };
 }
 
-function handleHttpRequest(
+async function handleHttpRequest(
   req: http.IncomingMessage,
   res: http.ServerResponse,
   config: Config,
   state: ServerState,
-): void {
+): Promise<void> {
   const url = new URL(req.url || '/', `http://${req.headers.host || `localhost:${config.port}`}`);
+
+  if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/docs' || url.pathname.startsWith('/docs/'))) {
+    const page = await renderDocsPage(url.pathname);
+    res.writeHead(page.status, {
+      'Content-Type': page.contentType,
+      'Cache-Control': 'no-store',
+    });
+    res.end(page.body);
+    return;
+  }
 
   if (req.method === 'GET' && url.pathname === '/health') {
     sendJson(res, 200, {
@@ -96,23 +110,24 @@ function handleHttpRequest(
       clients: state.clients.size,
       authRequired: true,
     });
-    return;
+    return Promise.resolve();
   }
 
   if (req.method === 'GET' && url.pathname === '/events') {
     if (!isAuthorized(req, config.sharedToken)) {
       sendUnauthorized(res);
-      return;
+      return Promise.resolve();
     }
 
     const habitatId = url.searchParams.get('habitatId') || '';
     const since = Number.parseInt(url.searchParams.get('since') || '0', 10);
     const events = replayEvents(state, habitatId, Number.isFinite(since) ? since : 0);
     sendJson(res, 200, { events });
-    return;
+    return Promise.resolve();
   }
 
   sendJson(res, 404, { error: 'Not found' });
+  return Promise.resolve();
 }
 
 function setupWebSockets(

@@ -15,6 +15,7 @@ https://planet.turingguild.com
 
 Use these public endpoints for normal testing:
 
+- `GET https://planet.turingguild.com/docs`: rendered project documentation.
 - `GET https://planet.turingguild.com/health`: public health check.
 - `GET https://planet.turingguild.com/events?habitatId=<id>&since=<eventId>`: replay recent events for a habitat.
 - `WSS wss://planet.turingguild.com/planet/stream`: live planet and habitat-channel stream.

@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "marked": "^18.0.5",
     "ws": "^8.18.2"
   },
   "devDependencies": {
