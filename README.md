@@ -5,16 +5,30 @@ Hello World planet simulation server for Kepler-442b habitat channels.
 The server exposes one public WebSocket endpoint and routes messages into isolated
 channels by `planetId` and `habitatId`.
 
-## Endpoints
+## Production Endpoint
 
-- `GET /health`: public health check.
-- `GET /events?habitatId=<id>&since=<eventId>`: replay recent events for a habitat.
-- `WS /planet/stream`: live planet and habitat-channel stream.
+The deployed server is exposed through Cloudflare Tunnel at:
+
+```text
+https://planet.turingguild.com
+```
+
+Use these public endpoints for normal testing:
+
+- `GET https://planet.turingguild.com/health`: public health check.
+- `GET https://planet.turingguild.com/events?habitatId=<id>&since=<eventId>`: replay recent events for a habitat.
+- `WSS wss://planet.turingguild.com/planet/stream`: live planet and habitat-channel stream.
 
 `/events` and `/planet/stream` require:
 
 ```text
 Authorization: Bearer <PLANET_SHARED_TOKEN>
+```
+
+The current shared token is stored outside the repo. On Kevin's laptop, it is in:
+
+```text
+~/.codex/kepler-planet-server-token.txt
 ```
 
 ## Local Development
@@ -25,7 +39,7 @@ npm run build
 PLANET_SHARED_TOKEN=dev-token npm start
 ```
 
-Connect with any WebSocket client to:
+For local development only, connect with any WebSocket client to:
 
 ```text
 ws://localhost:8787/planet/stream
