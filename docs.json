@@ -1,0 +1,66 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "willow",
+  "name": "Kepler Planet Server",
+  "description": "WebSocket planet simulation server for Kepler-442b habitat channels.",
+  "colors": {
+    "primary": "#2563EB",
+    "light": "#38BDF8",
+    "dark": "#1E3A8A"
+  },
+  "appearance": {
+    "default": "system"
+  },
+  "background": {
+    "decoration": "grid"
+  },
+  "search": {
+    "prompt": "Search planet server architecture, WebSocket protocol, and operations"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Start Here",
+            "pages": [
+              "docs/introduction",
+              "docs/quickstart"
+            ]
+          },
+          {
+            "group": "Architecture",
+            "pages": [
+              "docs/architecture/overview",
+              "docs/architecture/channel-model"
+            ]
+          },
+          {
+            "group": "API & Protocol",
+            "pages": [
+              "docs/api/websocket-protocol",
+              "docs/api/http-endpoints",
+              "docs/api/authentication"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "docs/operations/deployment",
+              "docs/operations/testing",
+              "docs/operations/known-limitations"
+            ]
+          },
+          {
+            "group": "Examples",
+            "pages": [
+              "docs/examples/websocket-client"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {}
+  }
+}

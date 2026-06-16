@@ -1,0 +1,76 @@
+---
+title: "Channel Model"
+description: "One WebSocket service with many isolated habitat channels."
+---
+
+The server uses one public WebSocket service with many internal channels.
+
+This replaces the older EchoPass-style idea where different public ports represented different people, teams, or rooms.
+
+## Decision
+
+Use:
+
+```text
+wss://planet.turingguild.com/planet/stream
+```
+
+Do not use:
+
+```text
+8700 = student A
+8701 = student B
+8702 = student C
+```
+
+Each connected client still has its own WebSocket connection. The single endpoint only means all clients enter through the same public service.
+
+## Channel identity
+
+The client joins a channel by sending a `hello` message:
+
+```json
+{
+  "type": "hello",
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-17",
+  "moduleId": "power-module",
+  "role": "system"
+}
+```
+
+The internal channel key is:
+
+```text
+kepler-442b/habitat-17
+```
+
+## Why channels instead of ports
+
+Channels avoid:
+
+- One tunnel per student
+- One public port per habitat
+- DNS and certificate sprawl
+- Cloudflare routing complexity
+- Artificial class-size limits
+
+They also allow a student's habitat modules to run on different computers while still sharing the same communication space.
+
+## Example habitat channel
+
+```text
+kepler-442b/habitat-17
+  dashboard
+  CLI operator console
+  power module
+  life-support module
+  greenhouse module
+  night-watch agent
+```
+
+## Isolation rule
+
+A module connected to `habitat-17` should not receive messages from `habitat-18`.
+
+The current implementation enforces this by storing clients in channel-specific sets and broadcasting only inside the matching `planetId/habitatId` channel.

@@ -1,0 +1,68 @@
+---
+title: "Testing"
+description: "Automated and manual checks for the Hello World server."
+---
+
+## Automated tests
+
+Build first, then run tests:
+
+```bash
+npm run build
+npm test
+```
+
+The current tests cover:
+
+- Message validation
+- Channel isolation
+- Replay endpoint behavior
+- Missing-token rejection for replay
+
+## Health check
+
+```bash
+curl https://planet.turingguild.com/health
+```
+
+Expected: HTTP 200 with `ok: true`.
+
+## Replay check
+
+```bash
+PLANET_SHARED_TOKEN="$(cat ~/.codex/kepler-planet-server-token.txt)"
+
+curl "https://planet.turingguild.com/events?habitatId=habitat-demo&since=0" \
+  -H "Authorization: Bearer $PLANET_SHARED_TOKEN"
+```
+
+Expected: HTTP 200 with an `events` array.
+
+## WebSocket smoke test
+
+Use any WebSocket client that supports custom headers.
+
+Connect to:
+
+```text
+wss://planet.turingguild.com/planet/stream
+```
+
+Add:
+
+```text
+Authorization: Bearer <PLANET_SHARED_TOKEN>
+```
+
+Send `hello`, wait for `server.hello_ack`, then wait for `planet.tick`.
+
+## Acceptance criteria
+
+- Service is active in systemd.
+- Health endpoint returns HTTP 200.
+- WebSocket auth rejects missing or bad tokens.
+- `planet.tick` arrives over WebSocket.
+- `planet.dust_update` arrives every third tick.
+- Same-habitat module messages relay.
+- Different habitats remain isolated.
+- Replay returns recent events for the requested habitat.

@@ -1,0 +1,84 @@
+---
+title: "Deployment"
+description: "How the Hello World server is deployed on the LMS LXC."
+---
+
+## Repository
+
+GitHub:
+
+```text
+https://github.com/Turing-Guild/kepler-planet-server
+```
+
+Local checkout:
+
+```text
+/Users/kevinmcquown/Projects/Organizations/Turing Guild/kepler-planet-server
+```
+
+LXC checkout:
+
+```text
+/home/klm/kepler-planet-server
+```
+
+## Runtime
+
+The `lms` LXC does not expose `node` on the default non-interactive SSH path, so the service uses the same explicit Node path as the LMS API:
+
+```text
+/home/klm/.nvm/versions/node/v20.20.1/bin/node
+```
+
+## Systemd
+
+Service name:
+
+```text
+kepler-planet-server.service
+```
+
+Environment file:
+
+```text
+/etc/kepler-planet-server.env
+```
+
+Required values:
+
+```text
+PORT=8787
+PLANET_SHARED_TOKEN=<secret>
+PLANET_TICK_MS=5000
+```
+
+## Cloudflare Tunnel
+
+The stable public route is configured on the existing `turingguild` Cloudflare Tunnel:
+
+```text
+planet.turingguild.com -> http://localhost:8787
+```
+
+The current ingress rule was added through the Cloudflare connector, not through the under-scoped tokens on the LXC.
+
+## Restart commands
+
+```bash
+ssh klm@192.168.0.105
+sudo systemctl restart kepler-planet-server.service
+sudo systemctl status kepler-planet-server.service --no-pager -l
+```
+
+## Deploy update
+
+```bash
+ssh klm@192.168.0.105
+cd /home/klm/kepler-planet-server
+git pull
+export PATH=/home/klm/.nvm/versions/node/v20.20.1/bin:/usr/local/bin:/usr/bin:/bin
+npm ci
+npm run build
+sudo systemctl restart kepler-planet-server.service
+```

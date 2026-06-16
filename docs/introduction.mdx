@@ -1,0 +1,42 @@
+---
+title: "Kepler Planet Server"
+description: "A Hello World WebSocket planet simulation for Kepler-442b habitat channels."
+---
+
+Kepler Planet Server is the first working slice of the Habitat Operations Platform's live planet layer.
+
+It runs a small server-owned simulation for a modeled version of **Kepler-442b** and streams events to student-built habitat systems over WebSockets. The current version is intentionally small: it proves channel isolation, planet ticks, module-to-module relay, replay, and deployment through Cloudflare Tunnel.
+
+## What exists today
+
+- One public WebSocket endpoint: `wss://planet.turingguild.com/planet/stream`
+- One public health endpoint: `https://planet.turingguild.com/health`
+- One replay endpoint: `https://planet.turingguild.com/events`
+- Shared bearer-token auth for WebSocket and replay access
+- Server-owned `planet.tick` events every 5 seconds
+- `planet.dust_update` events every third tick
+- Habitat-scoped module relay
+- In-memory recent event replay
+- Deployment on the `lms` LXC as `kepler-planet-server.service`
+
+## Why this exists
+
+The long-term course idea is:
+
+> Can your habitat software survive while you sleep?
+
+Students will eventually build habitat modules, dashboards, and agents that listen to planet events, respond to operational pressure, and produce logs or reports. This server is the first small piece of that architecture.
+
+## What this is not yet
+
+This Hello World version does not include:
+
+- LMS identity integration
+- Qubit redemption
+- Persistent database storage
+- Scoring or leaderboards
+- Destructive habitat failure mechanics
+- Multi-planet scheduling
+- Production-grade heartbeat cleanup
+
+Those can be added after the basic protocol proves itself.

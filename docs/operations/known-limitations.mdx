@@ -1,0 +1,58 @@
+---
+title: "Known Limitations"
+description: "What the Hello World server does not handle yet."
+---
+
+This is a Hello World implementation. It proves the architecture but is not a full production server yet.
+
+## In-memory state
+
+Events, channels, and clients live in process memory.
+
+Restarting the service clears:
+
+- Active channels
+- Connected clients
+- Replay history
+- Tick count
+
+## Heartbeats
+
+Normal WebSocket disconnects are handled:
+
+- The `close` event removes the client.
+- Empty channels are deleted.
+- Broadcast skips sockets that are not open.
+
+However, there is no explicit heartbeat yet. A half-dead connection may remain until the WebSocket/TCP layer notices it.
+
+Recommended next hardening:
+
+- Server pings every 30 seconds.
+- Clients must pong.
+- Missing pong causes `terminate()`.
+- Cleanup removes the client and possibly the empty channel.
+
+## Auth model
+
+The shared token is suitable for the first prototype only.
+
+Future versions should use LMS-issued credentials, join codes, or per-habitat tokens.
+
+## Simulation depth
+
+The current simulation emits deterministic dust and solar-output values. It does not yet model:
+
+- Habitat resources
+- Alerts
+- Tasks
+- Storm scenarios
+- Radiation events
+- Student actions
+- Qubit redemptions
+
+Those belong in later slices.
+
+## Replay durability
+
+Replay is not durable. If morning reports become part of the workflow, event history should move to persistent storage.

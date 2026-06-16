@@ -1,0 +1,78 @@
+---
+title: "HTTP Endpoints"
+description: "Health and replay endpoints for the planet server."
+---
+
+## GET /health
+
+Public health check.
+
+```bash
+curl https://planet.turingguild.com/health
+```
+
+Example response:
+
+```json
+{
+  "ok": true,
+  "service": "kepler-planet-server",
+  "planetId": "kepler-442b",
+  "uptimeSeconds": 499,
+  "tick": 99,
+  "channels": 0,
+  "clients": 0,
+  "authRequired": true
+}
+```
+
+## GET /events
+
+Replay recent in-memory events for a habitat.
+
+```text
+GET /events?habitatId=<habitatId>&since=<eventId>
+```
+
+Requires:
+
+```text
+Authorization: Bearer <PLANET_SHARED_TOKEN>
+```
+
+Example:
+
+```bash
+curl https://planet.turingguild.com/events?habitatId=habitat-demo\&since=0 \
+  -H "Authorization: Bearer $PLANET_SHARED_TOKEN"
+```
+
+Example response:
+
+```json
+{
+  "events": [
+    {
+      "id": 12,
+      "timestamp": "2026-06-16T21:10:00.000Z",
+      "planetId": "kepler-442b",
+      "habitatId": "habitat-demo",
+      "scope": "planet",
+      "type": "planet.tick",
+      "from": "kepler-442b",
+      "tick": 42,
+      "payload": {
+        "tick": 42,
+        "dustLevel": 0.5,
+        "solarOutputPercent": 70
+      }
+    }
+  ]
+}
+```
+
+## Replay behavior
+
+The replay endpoint returns events with `id > since`.
+
+Replay history is in memory. It is cleared when the service restarts.

@@ -1,0 +1,89 @@
+---
+title: "Quickstart"
+description: "Connect a WebSocket client and receive live planet events."
+---
+
+## Public endpoint
+
+Use the deployed WebSocket endpoint:
+
+```text
+wss://planet.turingguild.com/planet/stream
+```
+
+Send this HTTP header during the WebSocket upgrade:
+
+```text
+Authorization: Bearer <PLANET_SHARED_TOKEN>
+```
+
+The current test token is stored on Kevin's laptop at:
+
+```text
+~/.codex/kepler-planet-server-token.txt
+```
+
+## First message
+
+After the WebSocket opens, the first message must be a `hello` envelope:
+
+```json
+{
+  "type": "hello",
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-demo",
+  "moduleId": "laptop-client",
+  "role": "operator"
+}
+```
+
+The server responds with:
+
+```json
+{
+  "type": "server.hello_ack",
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-demo",
+  "moduleId": "laptop-client",
+  "channel": "kepler-442b/habitat-demo"
+}
+```
+
+## What you should see
+
+Once joined to a habitat channel, the client receives `planet.tick` events every 5 seconds:
+
+```json
+{
+  "id": 12,
+  "timestamp": "2026-06-16T21:10:00.000Z",
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-demo",
+  "scope": "planet",
+  "type": "planet.tick",
+  "from": "kepler-442b",
+  "tick": 42,
+  "payload": {
+    "tick": 42,
+    "dustLevel": 0.5,
+    "solarOutputPercent": 70
+  }
+}
+```
+
+Every third tick, the server also emits `planet.dust_update`.
+
+## Local development
+
+```bash
+npm install
+npm run build
+PLANET_SHARED_TOKEN=dev-token npm start
+```
+
+Local endpoints:
+
+```text
+http://localhost:8787/health
+ws://localhost:8787/planet/stream
+```

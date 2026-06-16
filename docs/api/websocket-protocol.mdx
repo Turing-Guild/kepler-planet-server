@@ -1,0 +1,110 @@
+---
+title: "WebSocket Protocol"
+description: "Message shapes for connecting, receiving planet events, and relaying habitat module messages."
+---
+
+## Endpoint
+
+```text
+WS /planet/stream
+```
+
+Production URL:
+
+```text
+wss://planet.turingguild.com/planet/stream
+```
+
+## Authentication
+
+The WebSocket upgrade requires:
+
+```text
+Authorization: Bearer <PLANET_SHARED_TOKEN>
+```
+
+Missing or invalid tokens receive `401 Unauthorized`.
+
+## Hello envelope
+
+The first client message must be:
+
+```json
+{
+  "type": "hello",
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-demo",
+  "moduleId": "power-module",
+  "role": "system"
+}
+```
+
+Identifier fields may contain letters, numbers, `.`, `_`, `:`, and `-`.
+
+## Server acknowledgement
+
+```json
+{
+  "type": "server.hello_ack",
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-demo",
+  "moduleId": "power-module",
+  "channel": "kepler-442b/habitat-demo"
+}
+```
+
+## Planet event envelope
+
+All broadcast and replayed events use this envelope:
+
+```json
+{
+  "id": 1,
+  "timestamp": "2026-06-16T21:10:00.000Z",
+  "planetId": "kepler-442b",
+  "habitatId": "habitat-demo",
+  "scope": "planet",
+  "type": "planet.tick",
+  "from": "kepler-442b",
+  "tick": 42,
+  "payload": {}
+}
+```
+
+Every broadcast event includes both `planetId` and `habitatId`.
+
+## Module message envelope
+
+After `hello`, a client can send:
+
+```json
+{
+  "scope": "habitat",
+  "type": "module.message",
+  "payload": {
+    "text": "Power module is online"
+  }
+}
+```
+
+The server stores the message as an event and relays it to other clients in the same habitat channel.
+
+Supported Hello World module event types:
+
+- `module.message`
+- `module.status`
+
+The validator accepts other `module.*` types so the prototype can experiment without a deploy for every new module message.
+
+## Error messages
+
+Errors use:
+
+```json
+{
+  "type": "server.error",
+  "error": "First message must be a valid hello envelope"
+}
+```
+
+Some errors can happen before the server knows the habitat, so `server.error` does not always include `planetId` or `habitatId`.

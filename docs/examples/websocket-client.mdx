@@ -1,0 +1,66 @@
+---
+title: "WebSocket Client Example"
+description: "A minimal Node client for the deployed planet server."
+---
+
+Install `ws` in a scratch folder or use the repository dependencies:
+
+```bash
+npm install ws
+```
+
+Create `client.mjs`:
+
+```js
+import WebSocket from "ws";
+
+const token = process.env.PLANET_SHARED_TOKEN;
+const ws = new WebSocket("wss://planet.turingguild.com/planet/stream", {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+ws.on("open", () => {
+  ws.send(JSON.stringify({
+    type: "hello",
+    planetId: "kepler-442b",
+    habitatId: "habitat-demo",
+    moduleId: "laptop-client",
+    role: "operator",
+  }));
+});
+
+ws.on("message", (data) => {
+  const message = JSON.parse(data.toString());
+  console.log(message);
+
+  if (message.type === "server.hello_ack") {
+    ws.send(JSON.stringify({
+      scope: "habitat",
+      type: "module.message",
+      payload: {
+        text: "Laptop client online",
+      },
+    }));
+  }
+});
+
+ws.on("error", (error) => {
+  console.error(error);
+});
+```
+
+Run:
+
+```bash
+PLANET_SHARED_TOKEN="$(cat ~/.codex/kepler-planet-server-token.txt)" node client.mjs
+```
+
+You should see:
+
+- `server.hello_ack`
+- `planet.tick`
+- `planet.dust_update` every third tick
+
+Open the same script in another terminal with the same `habitatId` and a different `moduleId` to test habitat-scoped relay.

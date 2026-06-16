@@ -1,0 +1,73 @@
+---
+title: "Architecture Overview"
+description: "How the Hello World planet simulation server is structured."
+---
+
+The server is a standalone Node/TypeScript service. It is intentionally separate from the LMS repo.
+
+## Responsibilities
+
+The Planet Simulation Server owns:
+
+- WebSocket upgrade handling
+- Shared-token auth
+- Habitat channel membership
+- Server-owned planet ticks
+- Recent event replay
+- Module message relay within a habitat channel
+- Health reporting
+
+Student habitat systems own:
+
+- Local habitat state
+- Rules and alerts
+- Module behavior
+- Dashboards and CLIs
+- Agents and reports
+
+## Runtime flow
+
+```text
+Planet clock
+  -> planet.tick
+  -> planet.dust_update
+  -> broadcast to each active habitat channel
+
+Habitat module
+  -> module.message or module.status
+  -> server stores event
+  -> server relays to same habitat channel
+```
+
+## Current deployment
+
+The service runs on the existing `lms` LXC:
+
+```text
+/home/klm/kepler-planet-server
+```
+
+Systemd unit:
+
+```text
+kepler-planet-server.service
+```
+
+Internal port:
+
+```text
+8787
+```
+
+Cloudflare Tunnel exposes:
+
+```text
+https://planet.turingguild.com
+wss://planet.turingguild.com/planet/stream
+```
+
+## Data model
+
+The Hello World version stores recent events in memory only. Restarting the service clears replay history, active channels, and connected clients.
+
+This is acceptable for the first slice. A later production version should move event history, habitat registry, and audit data into durable storage.

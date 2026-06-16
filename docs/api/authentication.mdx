@@ -1,0 +1,52 @@
+---
+title: "Authentication"
+description: "Shared-token auth for the Hello World server."
+---
+
+The Hello World server uses one shared bearer token.
+
+This is intentionally simple. It protects the public prototype from random clients without introducing LMS identity or join-code flows too early.
+
+## Protected surfaces
+
+Requires auth:
+
+- `WS /planet/stream`
+- `GET /events`
+
+Public:
+
+- `GET /health`
+
+## Header
+
+```text
+Authorization: Bearer <PLANET_SHARED_TOKEN>
+```
+
+## Local token location
+
+Kevin's current test token is stored at:
+
+```text
+~/.codex/kepler-planet-server-token.txt
+```
+
+The deployed service reads the token from:
+
+```text
+/etc/kepler-planet-server.env
+```
+
+Do not commit token values to the repository.
+
+## Future auth direction
+
+Later versions should replace shared-token auth with one of:
+
+- LMS-issued habitat tokens
+- Join-code-to-JWT exchange
+- Per-student habitat credentials
+- Instructor-managed capability tokens for modules and agents
+
+The current shared token is only for the first Hello World integration slice.
